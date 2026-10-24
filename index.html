@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Smart Deriv Trading Bot</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #f4f6f9; padding: 30px; }
+    .card { background: white; max-width: 450px; margin: auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    button { background: #ff444f; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 10px; }
+    button:hover { background: #d9363e; }
+    .status { margin-top: 15px; font-weight: bold; color: #333; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Deriv Auto Bot Platform</h2>
+    <p>Connect your Deriv account & run our custom trading strategy.</p>
+
+    <!-- 1. Kitufe cha Login -->
+    <button id="loginBtn">Log in with Deriv</button>
+
+    <hr style="margin: 20px 0;">
+
+    <!-- 2. Controls za Bot -->
+    <button id="startBotBtn" disabled>Start Bot</button>
+    <button id="stopBotBtn" disabled>Stop Bot</button>
+
+    <div class="status" id="statusText">Status: Not Connected</div>
+  </div>
+
+  <script>
+    // Badilisha hizi na App ID yako & Affiliate Token yako kutoka Deriv
+    const APP_ID = 'YOUR_APP_ID'; 
+    const AFFILIATE_TOKEN = 'YOUR_AFFILIATE_TOKEN';
+
+    const loginBtn = document.getElementById('loginBtn');
+    const startBotBtn = document.getElementById('startBotBtn');
+    const stopBotBtn = document.getElementById('stopBotBtn');
+    const statusText = document.getElementById('statusText');
+
+    let ws = null;
+    let botRunning = false;
+
+    // 1. Handling Deriv Login Redirect
+    loginBtn.onclick = () => {
+      const redirectUrl = encodeURIComponent(window.location.origin);
+      window.location.href = `https://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&affiliate_token=${AFFILIATE_TOKEN}&redirect_uri=${redirectUrl}`;
+    };
+
+    // 2. Kuchukua Token kutoka URL baada ya User kurudi
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token1');
+
+    if (token) {
+      statusText.innerText = "Status: Authenticating...";
+      connectWebSocket(token);
+    }
+
+    // 3. Connection ya WebSocket
+    function connectWebSocket(authToken) {
+      ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`);
+
+      ws.onopen = () => {
+        // Authorize user account
+        ws.send(JSON.stringify({ authorize: authToken }));
+      };
+
+      ws.onmessage = (event) => {
+        const response = JSON.parse(event.data);
+
+        if (response.msg_type === 'authorize') {
+          statusText.innerText = `Connected as: ${response.authorize.email}`;
+          startBotBtn.disabled = false;
+        }
+
+        if (response.msg_type === 'buy') {
+          console.log("Trade Executed!", response);
+          statusText.innerText = `Trade Placed! Contract ID: ${response.buy.contract_id}`;
+        }
+      };
+    }
+
+    // 4. Mfumo wa Bot ya Kiotomatiki (Logic)
+    startBotBtn.onclick = () => {
+      botRunning = true;
+      startBotBtn.disabled = true;
+      stopBotBtn.disabled = false;
+      statusText.innerText = "Status: Bot is Running...";
+
+      // Mfano: Inatrade kila sekunde 5 (Inanunua DIGITEVEN)
+      botInterval = setInterval(() => {
+        if (botRunning && ws) {
+          executeTrade();
+        }
+      }, 5000);
+    };
+
+    stopBotBtn.onclick = () => {
+      botRunning = false;
+      clearInterval(botInterval);
+      startBotBtn.disabled = false;
+      stopBotBtn.disabled = true;
+      statusText.innerText = "Status: Bot Stopped";
+    };
+
+    function executeTrade() {
+      ws.send(JSON.stringify({
+        buy: 1,
+        price: 1, // Stake $1
+        parameters: {
+          amount: 1,
+          basis: 'stake',
+          contract_type: 'DIGITEVEN', // Mfano wa Digit Even Strategy
+          currency: 'USD',
+          duration: 1,
+          duration_unit: 't',
+          symbol: 'R_100'
+        }
+      }));
+    }
+  </script>
+
+</body>
+</html>
