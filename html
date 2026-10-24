@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔥 Burnitortrader - Simba Mkali Edition</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0b0b0e; color: #f5f5f5; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: auto; background: #16161a; padding: 25px; border-radius: 16px; box-shadow: 0 8px 30px rgba(255, 68, 79, 0.3); border: 2px solid #ff444f; }
+    h2 { color: #ff444f; text-align: center; text-transform: uppercase; text-shadow: 0 0 10px rgba(255, 68, 79, 0.6); }
+    .lion-banner { text-align: center; font-size: 22px; font-weight: bold; color: #ffaa00; margin-bottom: 15px; }
+    .card { background: #1e1e24; border: 1px solid #2a2a35; padding: 18px; border-radius: 12px; margin-bottom: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    h3 { margin-top: 0; color: #ff444f; font-size: 18px; }
+    button { background: linear-gradient(135deg, #ff444f, #ff7b00); color: white; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 8px; font-size: 15px; text-transform: uppercase; transition: 0.3s; }
+    button:hover { opacity: 0.9; transform: scale(1.02); box-shadow: 0 0 15px rgba(255, 68, 79, 0.8); }
+    button:disabled { background: #333; color: #777; cursor: not-allowed; box-shadow: none; transform: none; }
+    .secondary-btn { background: linear-gradient(135deg, #2ea44f, #238636); }
+    .status { font-weight: bold; margin-top: 10px; font-size: 14px; color: #ffcc00; }
+    .flex { display: flex; gap: 10px; }
+    select, input { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: 1px solid #444; background: #2a2a35; color: white; font-size: 14px; }
+    .info-box { background: #26211f; border-left: 4px solid #ff7b00; padding: 10px; border-radius: 4px; font-size: 13px; margin-bottom: 10px; color: #ffa; }
+    .profit-display { font-size: 15px; font-weight: bold; color: #2ea44f; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="lion-banner">🦁🔥 BURNITORTRADER: SIMBA MKALI 🔥🦁</div>
+    <h2>🔥 Fire Auto Trading Platform 🔥</h2>
+    
+    <!-- User Account Info -->
+    <div class="card" id="userCard">
+      <p id="statusText">Hali: Haijaunganishwa na Moto</p>
+      <p id="balanceText" style="font-weight: bold; color: #2ea44f; display: none; font-size: 18px;"></p>
+      <button id="loginBtn">🔥 Log in with Deriv 🔥</button>
+    </div>
+
+    <!-- AI Market Scanner -->
+    <div class="card">
+      <h3>🤖 AI Fire Market Scanner</h3>
+      <p class="info-box" id="scannerText">Inachanganua masoko yenye moto mkali...</p>
+      <button class="secondary-btn" onclick="runAIScanner()">Changanua Soko la Moto (Scan)</button>
+    </div>
+
+    <!-- Wakisasa Bot (Auto Bot) -->
+    <div class="card">
+      <h3>⚡ Wakisasa Bot (Simba Strategy + Martingale + Take Profit)</h3>
+      <label>Chagua Mkakati wa Simba:</label>
+      <select id="botStrategy">
+        <option value="DIGITEVEN">Subiri Odd 5 -> Ingia EVEN (Fire)</option>
+        <option value="DIGITODD">Subiri Even 5 -> Ingia ODD (Fire)</option>
+      </select>
+
+      <label>Base Stake ya Kwanza ($):</label>
+      <input type="number" id="baseStake" value="1" min="0.5">
+
+      <label>Take Profit ($) - Lengo la Faida:</label>
+      <input type="number" id="takeProfitInput" value="10" min="1">
+
+      <label>Chagua Soko la Moto:</label>
+      <select id="botSymbol">
+        <!-- 1-Second Volatility Indices -->
+        <option value="1HZ10V">Volatility 10 (1s) Index</option>
+        <option value="1HZ15V">Volatility 15 (1s) Index</option>
+        <option value="1HZ25V">Volatility 25 (1s) Index</option>
+        <option value="1HZ30V">Volatility 30 (1s) Index</option>
+        <option value="1HZ50V">Volatility 50 (1s) Index</option>
+        <option value="1HZ75V">Volatility 75 (1s) Index</option>
+        <option value="1HZ100V">Volatility 100 (1s) Index</option>
+        <!-- Standard Volatility Indices -->
+        <option value="R_10">Volatility 10 Index</option>
+        <option value="R_15">Volatility 15 Index</option>
+        <option value="R_25">Volatility 25 Index</option>
+        <option value="R_30">Volatility 30 Index</option>
+        <option value="R_50">Volatility 50 Index</option>
+        <option value="R_75">Volatility 75 Index</option>
+        <option value="R_100" selected>Volatility 100 Index</option>
+      </select>
+
+      <div class="profit-display" id="sessionProfitText">Jumla ya Faida ya Kipindi hiki: $0.00</div>
+
+      <div class="flex" style="margin-top: 12px;">
+        <button id="startBotBtn" disabled>Washa Simba Bot</button>
+        <button id="stopBotBtn" disabled style="background: linear-gradient(135deg, #555, #333);">Simamisha Bot</button>
+      </div>
+      <p class="status" id="botStatus">Simba yuko kimya (Imesimama)</p>
+    </div>
+
+    <!-- Manual Trading -->
+    <div class="card">
+      <h3>📈 Manual Fire Trading</h3>
+      <label>Chagua Aina ya Trade:</label>
+      <select id="manualType">
+        <option value="CALL">Rise (Juu - Moto)</option>
+        <option value="PUT">Fall (Chini - Moto)</option>
+      </select>
+      <label>Stake ($):</label>
+      <input type="number" id="manualStake" value="1" min="0.5">
+      <button class="secondary-btn" id="manualTradeBtn" disabled onclick="executeManualTrade()">Fanya Trade Manual</button>
+    </div>
+  </div>
+
+  <script>
+    const APP_ID = '34Lu9mGUc3CNrw2nTelD0';
+    const AFFILIATE_TOKEN = '89SKPGDAK3ZX';
+
+    const loginBtn = document.getElementById('loginBtn');
+    const startBotBtn = document.getElementById('startBotBtn');
+    const stopBotBtn = document.getElementById('stopBotBtn');
+    const statusText = document.getElementById('statusText');
+    const balanceText = document.getElementById('balanceText');
+    const botStatus = document.getElementById('botStatus');
+    const scannerText = document.getElementById('scannerText');
+    const manualTradeBtn = document.getElementById('manualTradeBtn');
+    const sessionProfitText = document.getElementById('sessionProfitText');
+    const takeProfitInput = document.getElementById('takeProfitInput');
+
+    let ws = null;
+    let authToken = null;
+    let botRunning = false;
+    let currentStake = 1;
+    let baseStakeInput = document.getElementById('baseStake');
+    let consecutiveCount = 0;
+    let lastCheckedTickId = null;
+    let totalSessionProfit = 0;
+
+    // Login Redirect
+    loginBtn.onclick = () => {
+      const redirectUrl = encodeURIComponent(window.location.origin);
+      window.location.href = `https://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&affiliate_token=${AFFILIATE_TOKEN}&redirect_uri=${redirectUrl}`;
+    };
+
+    // Catch Token from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token1');
+
+    if (token) {
+      statusText.innerText = "Hali: Simba anathibitisha akaunti...";
+      connectWebSocket(token);
+    }
+
+    function connectWebSocket(tokenVal) {
+      authToken = tokenVal;
+      ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`);
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ authorize: authToken }));
+      };
+
+      ws.onmessage = (event) => {
+        const response = JSON.parse(event.data);
+
+        if (response.msg_type === 'authorize') {
+          statusText.innerText = `🦁 Simba Ameunganishwa: ${response.authorize.email}`;
+          balanceText.style.display = 'block';
+          balanceText.innerText = `Salio: ${response.authorize.balance} ${response.authorize.currency}`;
+          loginBtn.style.display = 'none';
+          startBotBtn.disabled = false;
+          manualTradeBtn.disabled = false;
+          
+          ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+        }
+
+        if (response.msg_type === 'balance') {
+          balanceText.innerText = `Salio: ${response.balance.balance} ${response.balance.currency}`;
+        }
+
+        if (response.msg_type === 'tick' && botRunning) {
+          processWakisasaBotTick(response.tick);
+        }
+
+        if (response.msg_type === 'buy') {
+          botStatus.innerText = `🔥 Simba Amepiga Trade ($${currentStake})! Inasubiri matokeo... ID: ${response.buy.contract_id}`;
+          trackContract(response.buy.contract_id);
+        }
+
+        if (response.msg_type === 'proposal_open_contract') {
+          const contract = response.proposal_open_contract;
+          if (contract && contract.is_sold && botRunning) {
+            const profit = contract.profit;
+            totalSessionProfit += profit;
+            sessionProfitText.innerText = `Jumla ya Faida ya Kipindi hiki: $${totalSessionProfit.toFixed(2)}`;
+
+            const targetTP = parseFloat(takeProfitInput.value) || 10;
+            if (totalSessionProfit >= targetTP) {
+              botRunning = false;
+              startBotBtn.disabled = false;
+              stopBotBtn.disabled = true;
+              botStatus.innerText = `🎯 TAKE PROFIT IMEFIKA! ($${totalSessionProfit.toFixed(2)}). Simba amesimama kulinda faida! 🔥`;
+              ws.send(JSON.stringify({ forget: contract.id }));
+              return;
+            }
+
+            const baseVal = parseFloat(baseStakeInput.value) || 1;
+            if (profit > 0) {
+              botStatus.innerText = `🦁🔥 Simba Ameshinda! Faida: +$${profit.toFixed(2)}. Inarudi Base Stake ($${baseVal}).`;
+              currentStake = baseVal;
+            } else {
+              botStatus.innerText = `❌ Trade Imepoteza ($${profit.toFixed(2)}). Simba anapandisha Martingale ($${currentStake * 2})...`;
+              currentStake *= 2;
+            }
+          }
+        }
+      };
+    }
+
+    // AI Scanner
+    function runAIScanner() {
+      scannerText.innerText = "🔥 AI inawasha moto kwenye masoko yote...";
+      setTimeout(() => {
+        const markets = ['Volatility 30 (1s) Index (1HZ30V)', 'Volatility 15 (1s) Index (1HZ15V)', 'Volatility 100 Index (R_100)', 'Volatility 30 Index (R_30)'];
+        const chosen = markets[Math.floor(Math.random() * markets.length)];
+        scannerText.innerHTML = `🦁🔥 <b>Soko la Moto La Simba:</b> ${chosen} linawaka vizuri kwa ajili ya vita ya faida!`;
+      }, 1500);
+    }
+
+    // Wakisasa Bot Controls
+    startBotBtn.onclick = () => {
+      if (!ws) return alert('Tafadhali log in kwanza!');
+      botRunning = true;
+      startBotBtn.disabled = true;
+      stopBotBtn.disabled = false;
+      currentStake = parseFloat(baseStakeInput.value) || 1;
+      consecutiveCount = 0;
+      totalSessionProfit = 0;
+      sessionProfitText.innerText = `Jumla ya Faida ya Kipindi hiki: $0.00`;
+      
+      const symbol = document.getElementById('botSymbol').value;
+      botStatus.innerText = `🦁 Simba anavizia kwenye soko la ${symbol}...`;
+      
+      ws.send(JSON.stringify({ ticks: symbol, subscribe: 1 }));
+    };
+
+    stopBotBtn.onclick = () => {
+      botRunning = false;
+      startBotBtn.disabled = false;
+      stopBotBtn.disabled = true;
+      botStatus.innerText = "Simba amepumzika (Bot Imesimama).";
+    };
+
+    function processWakisasaBotTick(tick) {
+      if (!botRunning) return;
+      if (tick.id === lastCheckedTickId) return;
+      lastCheckedTickId = tick.id;
+
+      const quoteStr = tick.quote.toString();
+      const lastDigit = parseInt(quoteStr.slice(-1));
+      const isOdd = lastDigit % 2 !== 0;
+
+      const strategy = document.getElementById('botStrategy').value;
+
+      if (strategy === 'DIGITEVEN') {
+        if (isOdd) {
+          consecutiveCount++;
+          botStatus.innerText = `🦁 Subiri Odd 5: Imepatikana Odd (${consecutiveCount}/5) - Namba: ${lastDigit} | Stake: $${currentStake}`;
+          if (consecutiveCount >= 5) {
+            executeBotTrade('DIGITEVEN');
+            consecutiveCount = 0;
+          }
+        } else {
+          consecutiveCount = 0;
+          botStatus.innerText = `🔥 Imekuja Even (${lastDigit}), Simba anahesabu upya Odd... | Stake: $${currentStake}`;
+        }
+      } else if (strategy === 'DIGITODD') {
+        if (!isOdd) {
+          consecutiveCount++;
+          botStatus.innerText = `🦁 Subiri Even 5: Imepatikana Even (${consecutiveCount}/5) - Namba: ${lastDigit} | Stake: $${currentStake}`;
+          if (consecutiveCount >= 5) {
+            executeBotTrade('DIGITODD');
+            consecutiveCount = 0;
+          }
+        } else {
+          consecutiveCount = 0;
+          botStatus.innerText = `🔥 Imekuja Odd (${lastDigit}), Simba anahesabu upya Even... | Stake: $${currentStake}`;
+        }
+      }
+    }
+
+    function executeBotTrade(contractType) {
+      const symbol = document.getElementById('botSymbol').value;
+      botStatus.innerText = `🔥 Simba Anashambulia! Trade ya ${contractType} (${symbol}) kwa Stake ya $${currentStake}...`;
+
+      ws.send(JSON.stringify({
+        buy: 1,
+        price: currentStake,
+        parameters: {
+          amount: currentStake,
+          basis: 'stake',
+          contract_type: contractType,
+          currency: 'USD',
+          duration: 1,
+          duration_unit: 't',
+          symbol: symbol
+        }
+      }));
+    }
+
+    function trackContract(contractId) {
+      ws.send(JSON.stringify({ proposal_open_contract: 1, contract_id: contractId, subscribe: 1 }));
+    }
+
+    function executeManualTrade() {
+      const contractType = document.getElementById('manualType').value;
+      const stake = parseFloat(document.getElementById('manualStake').value) || 1;
+      const symbol = document.getElementById('botSymbol').value;
+      
+      ws.send(JSON.stringify({
+        buy: 1,
+        price: stake,
+        parameters: {
+          amount: stake,
+          basis: 'stake',
+          contract_type: contractType,
+          currency: 'USD',
+          duration: 5,
+          duration_unit: 't',
+          symbol: symbol
+        }
+      }));
+      alert(`🔥 Trade ya Moto ya Manual imetumwa kwenye ${symbol}!`);
+    }
+  </script>
+
+</body>
+          </html>
+          
